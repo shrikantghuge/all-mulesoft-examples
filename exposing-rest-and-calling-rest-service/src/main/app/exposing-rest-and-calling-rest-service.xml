@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="0.0.0.0" port="${app.port}" doc:name="HTTP Listener Configuration"/>
+    <http:request-config name="HTTP_Request_Configuration" host="${request.app.host}" port="${request.app.port}" doc:name="HTTP Request Configuration"/>
+    <flow name="exposing-rest-and-calling-rest-serviceFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="rest-to-rest" allowedMethods="POST" doc:name="HTTP"/>
+        <logger message="REST to REST entry before transformation" level="INFO" doc:name="Logger"/>
+        <json:json-to-object-transformer returnClass="java.util.Map" doc:name="JSON to Object"/>
+        <logger message="Country provided #[payload.country]" level="INFO" doc:name="Logger"/>
+        <http:request config-ref="HTTP_Request_Configuration" path="${request.app.baseurl}{country}" method="GET" doc:name="HTTP">
+            <http:request-builder>
+                <http:uri-param paramName="country" value="#[payload.country]"/>
+            </http:request-builder>
+        </http:request>
+    </flow>
+</mule>
